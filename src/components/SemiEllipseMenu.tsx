@@ -149,6 +149,36 @@ const SemiEllipseMenu: React.FC<SemiEllipseMenuProps> = ({ options, onOptionClic
         <div className="menu-label">类目</div>
       </div>
       
+      <div className={`ellipse-rectangle ${isExpanded ? 'expanded' : ''}`}>
+        <div className="grid-container">
+          {Array.from({length: 24}, (_, i) => {
+            // 计算当前格子的行列位置 (6行4列)
+            const row = Math.floor(i / 4);
+            const col = i % 4;
+            
+            // 检查是否在椭圆区域内 (椭圆中心在50%高度，半径40vh)
+            const gridHeight = 6;
+            const centerRow = (gridHeight - 1) / 2; // 2.5
+            const ellipseRadius = 2; // 大约2行的范围
+            
+            const distanceFromCenter = Math.abs(row - centerRow);
+            const isInEllipse = col === 0 && distanceFromCenter <= ellipseRadius;
+            
+            if (isInEllipse) {
+              return <div key={i} className="grid-item invisible"></div>;
+            }
+            
+            return (
+              <div key={i} className="grid-item">
+                <div className="grid-icon">🎌</div>
+                <div className="grid-text">动漫周边</div>
+              </div>
+            );
+          })}
+        </div>
+        <div className="ellipse-mask"></div>
+      </div>
+      
       <div className={`menu-container ${isExpanded ? 'expanded' : ''}`}>
         <div className="menu-content" ref={contentRef}>
           {[...options, ...options, ...options].map((option, index) => {
