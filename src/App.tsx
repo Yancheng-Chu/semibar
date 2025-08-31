@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import SemiEllipseMenu from './components/SemiEllipseMenu'
+import Semibar from './components/semibar'
 import './App.css'
 
 function App() {
@@ -29,7 +30,10 @@ function App() {
         options={menuOptions}
         onOptionClick={handleOptionClick}
       />
-      
+      {/* <Semibar 
+        options={menuOptions}
+        onOptionClick={handleOptionClick}
+      /> */}
     </div>
   )
 }
