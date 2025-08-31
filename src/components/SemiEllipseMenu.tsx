@@ -20,7 +20,7 @@ const SemiEllipseMenu: React.FC<SemiEllipseMenuProps> = ({ options, onOptionClic
   });
   const menuRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -135,6 +135,7 @@ const SemiEllipseMenu: React.FC<SemiEllipseMenuProps> = ({ options, onOptionClic
         <div className="arrow-icon">
           →
         </div>
+        <div className="menu-label">类目</div>
       </div>
       
       <div className={`menu-container ${isExpanded ? 'expanded' : ''}`}>
