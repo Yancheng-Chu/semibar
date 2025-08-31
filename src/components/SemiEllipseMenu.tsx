@@ -77,7 +77,7 @@ const SemiEllipseMenu: React.FC<SemiEllipseMenuProps> = ({ options, onOptionClic
         }
         
         // 设置磁吸定时器 - 滚动停止150ms后自动对齐
-        scrollTimeoutRef.current = setTimeout(snapToCenter, 150);
+        scrollTimeoutRef.current = window.setTimeout(snapToCenter, 150);
         
         // 无限循环逻辑
         if (scrollTop <= 0) {
@@ -88,13 +88,24 @@ const SemiEllipseMenu: React.FC<SemiEllipseMenuProps> = ({ options, onOptionClic
       }
     };
 
-    if (contentRef.current && isExpanded) {
-      contentRef.current.addEventListener('scroll', handleScroll);
+    const handleMouseLeave = () => {
+      // 鼠标离开时也触发磁吸对齐
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+      scrollTimeoutRef.current = window.setTimeout(snapToCenter, 100);
+    };
+
+    const currentContentRef = contentRef.current;
+    if (currentContentRef && isExpanded) {
+      currentContentRef.addEventListener('scroll', handleScroll);
+      currentContentRef.addEventListener('mouseleave', handleMouseLeave);
     }
 
     return () => {
-      if (contentRef.current) {
-        contentRef.current.removeEventListener('scroll', handleScroll);
+      if (currentContentRef) {
+        currentContentRef.removeEventListener('scroll', handleScroll);
+        currentContentRef.removeEventListener('mouseleave', handleMouseLeave);
       }
       if (scrollTimeoutRef.current) {
         clearTimeout(scrollTimeoutRef.current);
