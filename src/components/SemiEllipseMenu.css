@@ -32,7 +32,7 @@
 
 .menu-trigger.expanded {
   background: #1d4ed8;
-  left: 275px;
+  left: 195px;
 }
 
 .arrow-icon {
@@ -70,7 +70,7 @@
 .menu-container.expanded {
   width: 400px;
   height: 100vh;
-  clip-path: ellipse(300px 40vh at 0% 50%);
+  clip-path: ellipse(220px 35vh at 0% 50%);
 }
 
 
