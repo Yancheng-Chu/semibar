@@ -21,7 +21,6 @@ const SemiEllipseMenu: React.FC<SemiEllipseMenuProps> = ({ options, onOptionClic
   const menuRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const scrollTimeoutRef = useRef<number | null>(null);
-  const isProgrammaticScrollRef = useRef(false);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -41,35 +40,26 @@ const SemiEllipseMenu: React.FC<SemiEllipseMenuProps> = ({ options, onOptionClic
 
   useEffect(() => {
     const snapToCenter = () => {
-      if (contentRef.current && !isProgrammaticScrollRef.current) {
+      if (contentRef.current) {
         const { scrollTop, clientHeight } = contentRef.current;
         const itemHeight = 70;
         const containerCenter = clientHeight / 2;
         const currentCenter = scrollTop + containerCenter;
         
-        // 计算最接近中心的项目索引
-        const nearestItemIndex = Math.round((currentCenter - itemHeight / 2) / itemHeight);
-        // 计算该项目应该在容器正中心的位置
-        const targetPosition = nearestItemIndex * itemHeight + itemHeight / 2 - containerCenter;
-        
-        // 设置程序性滚动标志
-        isProgrammaticScrollRef.current = true;
+        // 计算最接近中心的项目位置
+        const nearestItemIndex = Math.round(currentCenter / itemHeight);
+        const targetPosition = nearestItemIndex * itemHeight - containerCenter + (itemHeight / 2);
         
         // 平滑滚动到目标位置
         contentRef.current.scrollTo({
           top: targetPosition,
           behavior: 'smooth'
         });
-        
-        // 重置程序性滚动标志
-        setTimeout(() => {
-          isProgrammaticScrollRef.current = false;
-        }, 500);
       }
     };
 
     const handleScroll = () => {
-      if (contentRef.current && !isProgrammaticScrollRef.current) {
+      if (contentRef.current) {
         const { scrollTop, scrollHeight, clientHeight } = contentRef.current;
         const itemHeight = 70;
         
@@ -80,54 +70,31 @@ const SemiEllipseMenu: React.FC<SemiEllipseMenuProps> = ({ options, onOptionClic
         
         // 计算中心位置的项目索引
         const centerPosition = scrollTop + clientHeight / 2;
-        // 更精确的索引计算，考虑项目中心点
-        const rawIndex = Math.round((centerPosition - itemHeight / 2) / itemHeight);
-        const currentIndex = ((rawIndex % options.length) + options.length) % options.length;
-        
-        if (currentIndex !== selectedIndex && currentIndex >= 0) {
+        const currentIndex = Math.floor(centerPosition / itemHeight) % options.length;
+        if (currentIndex !== selectedIndex) {
           setSelectedIndex(currentIndex);
           localStorage.setItem('semi-ellipse-selected-index', currentIndex.toString());
         }
         
         // 设置磁吸定时器 - 滚动停止150ms后自动对齐
-        scrollTimeoutRef.current = window.setTimeout(snapToCenter, 150);
+        scrollTimeoutRef.current = setTimeout(snapToCenter, 150);
         
-        // 优化的无限循环逻辑 - 只在接近边界时才触发
-        const threshold = itemHeight * 0.5;
-        if (scrollTop <= threshold) {
-          isProgrammaticScrollRef.current = true;
-          contentRef.current.scrollTop = scrollHeight - clientHeight - itemHeight + threshold;
-          setTimeout(() => {
-            isProgrammaticScrollRef.current = false;
-          }, 100);
-        } else if (scrollTop >= scrollHeight - clientHeight - threshold) {
-          isProgrammaticScrollRef.current = true;
-          contentRef.current.scrollTop = itemHeight - threshold;
-          setTimeout(() => {
-            isProgrammaticScrollRef.current = false;
-          }, 100);
+        // 无限循环逻辑
+        if (scrollTop <= 0) {
+          contentRef.current.scrollTop = scrollHeight - clientHeight - itemHeight;
+        } else if (scrollTop >= scrollHeight - clientHeight) {
+          contentRef.current.scrollTop = itemHeight;
         }
       }
     };
 
-    const handleMouseLeave = () => {
-      // 鼠标离开时也触发磁吸对齐
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-      scrollTimeoutRef.current = window.setTimeout(snapToCenter, 100);
-    };
-
-    const currentContentRef = contentRef.current;
-    if (currentContentRef && isExpanded) {
-      currentContentRef.addEventListener('scroll', handleScroll);
-      currentContentRef.addEventListener('mouseleave', handleMouseLeave);
+    if (contentRef.current && isExpanded) {
+      contentRef.current.addEventListener('scroll', handleScroll);
     }
 
     return () => {
-      if (currentContentRef) {
-        currentContentRef.removeEventListener('scroll', handleScroll);
-        currentContentRef.removeEventListener('mouseleave', handleMouseLeave);
+      if (contentRef.current) {
+        contentRef.current.removeEventListener('scroll', handleScroll);
       }
       if (scrollTimeoutRef.current) {
         clearTimeout(scrollTimeoutRef.current);
@@ -142,32 +109,40 @@ const SemiEllipseMenu: React.FC<SemiEllipseMenuProps> = ({ options, onOptionClic
     if (!isExpanded && contentRef.current) {
       setTimeout(() => {
         if (contentRef.current) {
-          isProgrammaticScrollRef.current = true;
           const itemHeight = 70;
           const containerHeight = contentRef.current.clientHeight;
-          const containerCenter = containerHeight / 2;
-          
-          // 中间组的选中项位置（项目的中心点）
-          const selectedItemInMiddleGroup = options.length * itemHeight + selectedIndex * itemHeight + itemHeight / 2;
-          // 计算滚动位置，让选中项的中心点对齐容器中心
-          const scrollPosition = selectedItemInMiddleGroup - containerCenter;
-          
-          contentRef.current.scrollTop = scrollPosition;
-          
-          setTimeout(() => {
-            isProgrammaticScrollRef.current = false;
-          }, 200);
+          // 中间组的选中项位置
+          const selectedItemInMiddleGroup = options.length * itemHeight + selectedIndex * itemHeight;
+          // 椭圆中心位置偏移
+          const centerOffset = (containerHeight / 2) - (itemHeight / 2);
+          contentRef.current.scrollTop = selectedItemInMiddleGroup - centerOffset;
         }
       }, 50);
     }
   };
 
   const handleOptionClick = (option: MenuOption, index: number) => {
-    const actualIndex = index % options.length;
-    setSelectedIndex(actualIndex);
-    localStorage.setItem('semi-ellipse-selected-index', actualIndex.toString());
+    const optionIndex = index % options.length;
+    setSelectedIndex(optionIndex);
+    localStorage.setItem('semi-ellipse-selected-index', optionIndex.toString());
+    
+    // 自动滚动到选中项在椭圆中心
+    if (contentRef.current) {
+      const itemHeight = 70;
+      const containerHeight = contentRef.current.clientHeight;
+      const centerOffset = (containerHeight / 2) - (itemHeight / 2);
+      
+      // 计算目标滚动位置：选中项应该出现在椭圆中心
+      // 使用中间组的位置确保滚动的连续性
+      const targetScrollTop = options.length * itemHeight + optionIndex * itemHeight - centerOffset;
+      
+      contentRef.current.scrollTo({
+        top: targetScrollTop,
+        behavior: 'smooth'
+      });
+    }
+    
     onOptionClick?.(option);
-    // 不再自动关闭菜单，只有点击外部区域才关闭
   };
 
   return (
