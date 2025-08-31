@@ -1,0 +1,134 @@
+.semi-ellipse-menu {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  width: 400px;
+  z-index: 1000;
+}
+
+.menu-trigger {
+  position: absolute;
+  left: 25px;
+  top: calc(50% - 10px);
+  transform: translateY(-50%);
+  width: 50px;
+  height: 50px;
+  background: #3b82f6;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1001;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.menu-trigger:hover {
+  background: #2563eb;
+}
+
+.menu-trigger.expanded {
+  background: #1d4ed8;
+  left: 275px;
+}
+
+.arrow-icon {
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.menu-trigger.expanded .arrow-icon {
+  transform: rotate(180deg);
+}
+
+.menu-container {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 100vh;
+  overflow: hidden;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  clip-path: ellipse(0px 40vh at 0% 50%);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.menu-container.expanded {
+  width: 400px;
+  height: 100vh;
+  clip-path: ellipse(300px 40vh at 0% 50%);
+}
+
+
+.menu-content {
+  padding: 0;
+  height: 100%;
+  overflow-y: auto;
+  opacity: 0;
+  transform: translateX(-30px);
+  margin-left: 0;
+  scroll-behavior: smooth;
+  transition: all 0.3s ease 0.2s;
+}
+
+.menu-container.expanded .menu-content {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.menu-option {
+  display: flex;
+  align-items: center;
+  padding: 18px 10px 18px 20px;
+  height: 70px;
+  color: white;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  width: 100%;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.menu-option:last-child {
+  border-bottom: none;
+}
+
+.menu-option:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.menu-option.selected {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+  font-weight: 600;
+  margin-left: -20px;
+  padding-left: 40px;
+  width: calc(100% + 20px);
+}
+
+.menu-option.selected .option-label {
+  font-size: 18px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.option-label {
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  width: 100%;
+  text-align: left;
+}
+
+.menu-content::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+.menu-content {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
